@@ -129,6 +129,7 @@ type InstallCommand struct {
 	Version  validator.Version
 	Variant  *Variant
 	Metrics  *Metrics
+	Info     *validator.Info
 }
 
 func (cmd *InstallCommand) Env() map[string]string {
@@ -153,6 +154,15 @@ func (cmd *InstallCommand) Env() map[string]string {
 		env["VALIDATOR_VARIANT"] = string(VariantAgave)
 	}
 
+	if cmd.Info != nil {
+		infoEnv, err := cmd.Info.ToEnv()
+		if err == nil {
+			for key, value := range infoEnv {
+				env[key] = value
+			}
+		}
+	}
+
 	return env
 }
 
@@ -173,6 +183,7 @@ type Agave struct {
 	KeyPairs KeyPairs          `pulumi:"keyPairs" provider:"secret"`
 	Flags    Flags             `pulumi:"flags"`
 	Metrics  *Metrics          `pulumi:"metrics,optional"`
+	Info     *validator.Info   `pulumi:"info,optional"`
 }
 
 func (agave *Agave) Install() runner.Command {
@@ -182,6 +193,7 @@ func (agave *Agave) Install() runner.Command {
 		Version:  agave.Version,
 		Variant:  agave.Variant,
 		Metrics:  agave.Metrics,
+		Info:     agave.Info,
 	}
 }
 
